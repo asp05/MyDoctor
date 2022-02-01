@@ -4,9 +4,9 @@ import { colors, fonts } from '../../../utils'
 import { Button, Gap } from '../../atoms'
 import DarkProfile from './DarkProfile'
 
-const Header = ({onPress,title,type}) => {
+const Header = ({onPress,title,type,desc,photo}) => {
     if (type === 'dark-profile') {
-        return <DarkProfile onPress={onPress}/>
+        return <DarkProfile title={title} desc={desc} photo={photo} onPress={onPress}/>
     }
     return (
         <View style={styles.container(type)}>
@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
             flex:1,
             fontSize:20,
             fontFamily: fonts.primary[600],
-            color : type === 'dark' ? colors.white : colors.text.primary
+            color : type === 'dark' ? colors.white : colors.text.primary,
+            textTransform : 'capitalize'
         }
     )
 })

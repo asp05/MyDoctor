@@ -1,48 +1,56 @@
-import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-import { DummyDoctor4,DummyDoctor5,DummyDoctor6,DummyDoctor7,DummyDoctor8 } from '../../assets'
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, View } from 'react-native'
+import { ILNullPhoto } from '../../assets'
 import { Header, List } from '../../components'
-import { colors } from '../../utils'
+import { Fire } from '../../config'
+import { colors, showError } from '../../utils'
 
-const ChooseDoctor = ({navigation}) => {
+const ChooseDoctor = ({navigation,route}) => {
+    const category = route.params.name
+    const [listDoctor, setListDoctor] = useState([])
+    useEffect(() => {
+        getDoctorByCategory()
+    }, [])
+    
+    const getDoctorByCategory =()=>{
+        Fire.database()
+        .ref('doctors/')
+        .orderByChild('category')
+        .equalTo(category)
+        .once('value')
+        .then(res=>{
+            if (res.val()) {
+                const oldData = res.val()
+                const data = []
+                Object.keys(oldData).map(key => {
+                    data.push({
+                        id : key,
+                        data : oldData[key]
+                    })
+                })
+                setListDoctor(data)
+            }
+        })
+        .catch(err=>{
+            showError(err.message)
+        })
+    }
+
     return (
         <View style={styles.page}>
-            <Header type="dark" title="Pilih Dokter" onPress={() => navigation.goBack()} />
-            <List 
-                type="next" 
-                profile={DummyDoctor4} 
-                name="Alexander Jannie" 
-                desc="Wanita" 
-                onPress={()=>navigation.navigate('Chatting')}
-            />
-            <List 
-                type="next" 
-                profile={DummyDoctor5} 
-                name="John McParker Steve" 
-                desc="Pria" 
-                onPress={()=>navigation.navigate('Chatting')}
-            />
-            <List 
-                type="next" 
-                profile={DummyDoctor6} 
-                name="Nairobi Putri Hayza" 
-                desc="Wanita" 
-                onPress={()=>navigation.navigate('Chatting')}
-            />
-            <List 
-                type="next" 
-                profile={DummyDoctor7} 
-                name="James Rivillia" 
-                desc="Pria" 
-                onPress={()=>navigation.navigate('Chatting')}
-            />
-            <List 
-                type="next" 
-                profile={DummyDoctor8} 
-                name="Liu Yue Tian Park" 
-                desc="Wanita" 
-                onPress={()=>navigation.navigate('Chatting')}
-            />
+            <Header type="dark" title={`pilih ${category}`} onPress={() => navigation.goBack()} />
+            {listDoctor.map(item => {
+                return(
+                    <List 
+                        key={item.id}
+                        type="next" 
+                        profile={item?.data?.photo?.length > 0 ? {uri : item.data.photo} : ILNullPhoto } 
+                        name={item.data.fullName} 
+                        desc={item.data.gender} 
+                        onPress={()=>navigation.navigate('DoctorProfile',item)}
+                    />
+                )
+            })}
         </View>
     )
 }

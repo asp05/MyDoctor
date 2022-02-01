@@ -1,20 +1,38 @@
-import React from 'react'
-import { ImageBackground, StyleSheet, Text, View } from 'react-native'
-import { DummyHospital1, DummyHospital2, DummyHospital3, ILHospitalBG } from '../../assets'
+import React, { useEffect, useState } from 'react'
+import { ImageBackground, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ILHospitalBG } from '../../assets'
 import { ListHospital } from '../../components'
+import { Fire } from '../../config'
 import { colors, fonts } from '../../utils'
 
 const Hospitals = () => {
+    const [hospitals, setHospitals] = useState([])
+    useEffect(() => {
+        Fire.database()
+        .ref('hospitals/')
+        .once('value')
+        .then(res => {
+            if (res.val()) {
+                const dataFilter = res.val()
+                const data = dataFilter.filter(el => el !== null)
+                setHospitals(data)
+            }
+        })
+    }, [])
     return (
         <View style={styles.page}>
             <ImageBackground source={ILHospitalBG} style={styles.background}>
                 <Text style={styles.title}>Nearby Hospitals</Text>
-                <Text style={styles.desc}>3 Tersedia</Text>
+                <Text style={styles.desc}>{hospitals.length} Tersedia</Text>
             </ImageBackground>
             <View style={styles.content}>
-                <ListHospital type="Rumah Sakit " name="Citra Bunga Merdeka" address="Jln. Surya Sejahtera 20" picture={DummyHospital1} />
-                <ListHospital type="Rumah Sakit Anak" name="Happy Family & Kids" address="Jln. Surya Sejahtera 20" picture={DummyHospital2} />
-                <ListHospital type="Rumah Sakit Jiwa" name="Tingkatan Paling Atas" address="Jln. Surya Sejahtera 20" picture={DummyHospital3} />
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {hospitals.map(item => {
+                        return(
+                            <ListHospital key={item.id} type={item.title} name={item.name} address={item.address} picture={{uri : item.pictures}} />
+                        )
+                    })}
+                </ScrollView>
             </View>
         </View>
     )

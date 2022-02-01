@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { launchImageLibrary } from 'react-native-image-picker'
+import { useDispatch } from 'react-redux'
 import { ILNullPhoto } from '../../assets'
 import { Button, Gap, Header, Input, Loading, Profile } from '../../components'
 import { Fire } from '../../config'
@@ -11,7 +12,8 @@ const UpdateProfile = ({navigation}) => {
     const [photo, setPhoto] = useState(ILNullPhoto)
     const [photoForDB, setPhotoForDB] = useState("")
     const [password, setPassword] = useState("")
-    const [loading, setLoading] = useState(false)
+    
+    const dispatch = useDispatch()
 
     const [profile, setProfile] = useState({
         fullName : "",
@@ -23,9 +25,11 @@ const UpdateProfile = ({navigation}) => {
     useEffect(() => {
         getData('user').then(res => {
             const data = res
-            setPhoto({uri : res.photo})
+            const photoawal = res?.photo?.length > 0 ? {uri : res.photo} : ILNullPhoto
+            setPhoto(photoawal)
             setPhotoForDB(res.photo)
             setProfile(data)
+            console.log(data.fullName)
         })
     }, [])
 
@@ -37,10 +41,10 @@ const UpdateProfile = ({navigation}) => {
     }
 
     const update = () => {
-        setLoading(true)
+        dispatch({type:'SET_LOADING',value:true})
        if (password.length > 0) {
            if (password.length < 6) {
-               setLoading(false)
+               dispatch({type:'SET_LOADING',value:false})
                showError('Password kurang dari 6 karakter')
            }else{
                 updatePassword()
@@ -58,7 +62,7 @@ const UpdateProfile = ({navigation}) => {
             if (user) {
                 user.updatePassword(password)
                 .catch((error) => {
-                    setLoading(false)
+                    dispatch({type:'SET_LOADING',value:false})
                     const errorMessage = error.message;
                     showError(errorMessage)
                 });
@@ -73,11 +77,11 @@ const UpdateProfile = ({navigation}) => {
         .ref(`users/${profile.uid}`)
         .update(data)
         .then(res => {
-            setLoading(false)
+            dispatch({type:'SET_LOADING',value:false})
             storeData('user',data)
         })
         .catch((error) => {
-            setLoading(false)
+            dispatch({type:'SET_LOADING',value:false})
             const errorMessage = error.message;
             showError(errorMessage)
         });
@@ -102,28 +106,25 @@ const UpdateProfile = ({navigation}) => {
         })
     }
     return (
-        <>
-            <View style={styles.container}>
-                <Header title="Edit Profile" onPress={()=>navigation.goBack()} />
-                <ScrollView showsVerticalScrollIndicator={false} >
-                    <Gap height={40}/> 
-                    <Profile isRemove photo={photo} onPress={getImage} />
-                    <View style={styles.content}>
-                        <Gap height={26} />
-                        <Input label="Full Name" value={profile.fullName} onChangeText={(value) => changeText('fullName',value) }  />
-                        <Gap height={24} />
-                        <Input label="Profession"  value={profile.profession} onChangeText={(value) => changeText('profession',value) } />
-                        <Gap height={24} />
-                        <Input label="Email Address" value={profile.email} disable/>
-                        <Gap height={24} />
-                        <Input label="Password" secureTextEntry value={password} onChangeText={(value) => setPassword(value)} />
-                        <Gap height={40} />
-                        <Button title="Save Profile" onPress={update} />
-                    </View>
-                </ScrollView>
-            </View>
-            {loading && <Loading/> }
-        </>
+        <View style={styles.container}>
+            <Header title="Edit Profile" onPress={()=>navigation.goBack()} />
+            <ScrollView showsVerticalScrollIndicator={false} >
+                <Gap height={40}/> 
+                <Profile isRemove photo={photo} onPress={getImage} />
+                <View style={styles.content}>
+                    <Gap height={26} />
+                    <Input label="Full Name" value={profile.fullName} onChangeText={(value) => changeText('fullName',value) }  />
+                    <Gap height={24} />
+                    <Input label="Profession"  value={profile.profession} onChangeText={(value) => changeText('profession',value) } />
+                    <Gap height={24} />
+                    <Input label="Email Address" value={profile.email} disable/>
+                    <Gap height={24} />
+                    <Input label="Password" secureTextEntry value={password} onChangeText={(value) => setPassword(value)} />
+                    <Gap height={40} />
+                    <Button title="Save Profile" onPress={update} />
+                </View>
+            </ScrollView>
+        </View>
     )
 }
 

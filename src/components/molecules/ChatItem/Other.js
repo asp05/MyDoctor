@@ -1,17 +1,19 @@
 import React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
-import { DummyDoctor6 } from '../../../assets'
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native'
 import { colors, fonts } from '../../../utils'
 
-const Other = () => {
+
+const windowWidth = Dimensions.get("window").width;
+
+const Other = ({text,date,photo}) => {
     return (
         <View style={styles.container}>
-            <Image source={DummyDoctor6} style={styles.avatar} />
+            <Image source={photo} style={styles.avatar} />
             <View>
                 <View style={styles.chatContent}>
-                    <Text style={styles.text}>Oh tentu saja tidak karena jeruk itu sangat sehat...</Text>
+                    <Text style={styles.text}>{text}</Text>
                 </View>
-                <Text style={styles.date}>4.20 AM</Text>
+                <Text style={styles.date}>{date}</Text>
             </View>
         </View>
     )
@@ -24,14 +26,14 @@ const styles = StyleSheet.create({
         paddingLeft : 16,
         marginBottom : 20,
         alignItems : 'flex-end',
-        flexDirection : 'row'
+        flexDirection : 'row',
     },
     chatContent : {
         backgroundColor : colors.primary,
         padding : 12,
-        maxWidth : '80%',
+        maxWidth : windowWidth/1.5,
         borderRadius : 10,
-        borderBottomLeftRadius : 0
+        borderBottomLeftRadius : 0,
     },
     avatar : {
         height : 30,
